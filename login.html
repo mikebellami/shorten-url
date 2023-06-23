@@ -48,7 +48,6 @@
                             </a>
                             <p class="sigin-paragraph">Welcome back, please enter you details</p>
                         </div>
-                        <input type="hidden" name="action" value="signin" />
 
                         <div class="form-group">
                             <label class="form-label">Email</label>
@@ -63,7 +62,7 @@
                             <i class="ri-eye-line view-pwd"></i>
                         </div>
 
-                        <button type="text" id="TextBox" name="TextBox" class="btn-login">
+                        <button type="text" id="TextBox" class="btn-login">
                             <span class="submit-text ">Login</span>
                             <span class="btn-loader d-none"></span>
                         </button>
@@ -89,7 +88,7 @@
     <script src="assets/js/jquery.validate.min.js"></script>
 
     <script src="assets/js/bootstrap-4.4.1.min.js"></script>
-    <script src="assets/js/custom.js"></script>
+    <!-- <script src="assets/js/custom.js"></script> -->
 
     <script>
         $(".view-pwd").click(function () {
@@ -122,38 +121,59 @@
                 $(".btn-loader").removeClass("d-none");
                 $(".submit-text").addClass("d-none");
                 $(".btn-login").attr("disabled", true);
-                const formData = $(form).serialize();
-                $.post("api.php", formData, function (res) {
-                    const Toast = Swal.mixin({
-                        toast: true,
-                        position: 'top-end',
-                        showConfirmButton: false,
-                        timer: 3000,
-                        timerProgressBar: true,
-                    })
-                    const response = res;
-                    if (response.status == "success") {
-                        Toast.fire({
-                            icon: 'success',
-                            animation: true,
-                            title: 'Signed in successfully'
-                        }).then(() => {
-                            location.reload();
+                const formData = { name: $("#email").val(), password: $("#password").val() }
 
-                        });
-                    } else {
-                        Swal.fire({
-                            text: response.message,
-                            title: "Error!",
-                            icon: "error",
-                            confirmButtonText: "OK",
-                            confirmButtonColor: "#c51c2f",
-                        });
-                        $(".btn-loader").addClass("d-none");
-                        $(".submit-text").removeClass("d-none");
-                        $(".btn-login").attr("disabled", false);
+
+                $.ajax({
+                    type: "POST",
+                    url: "https://kally-url-shortner.onrender.com/user/login",
+                    data: formData,
+                    dataType: 'json',
+                    success: function (res) {
+                        console.log(res);
                     }
                 });
+
+
+                // login(formData).done((res) => {
+                //    
+                // console.log(res);
+                // }).fail((err) => {
+                // console.error(err);
+                // });
+
+
+                // $.post("api.php", formData, function (res) {
+                // const Toast = Swal.mixin({
+                // toast: true,
+                // position: 'top-end',
+                // showConfirmButton: false,
+                // timer: 3000,
+                // timerProgressBar: true,
+                // })
+                // const response = res;
+                // if (response.status == "success") {
+                // Toast.fire({
+                // icon: 'success',
+                // animation: true,
+                // title: 'Signed in successfully'
+                // }).then(() => {
+                // location.reload();
+                // 
+                // });
+                // } else {
+                // Swal.fire({
+                // text: response.message,
+                // title: "Error!",
+                // icon: "error",
+                // confirmButtonText: "OK",
+                // confirmButtonColor: "#c51c2f",
+                // });
+                // $(".btn-loader").addClass("d-none");
+                // $(".submit-text").removeClass("d-none");
+                // $(".btn-login").attr("disabled", false);
+                // }
+                // });
             },
         });
     </script>
