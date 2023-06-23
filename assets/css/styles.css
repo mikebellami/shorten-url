@@ -1899,8 +1899,8 @@ button:focus {
 }
 
 label.error {
-  font-size: 14px !important;
-  color: #d93025;
+  font-size: 12px !important;
+  color: #d93025 !important;
   margin-top: 10px;
 }
 
@@ -3902,7 +3902,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .btn-login:disabled,
 .submit:disabled {
-  background-color: #c33f4d;
+  background-color: #325488;
 }
 
 .app-box-wrap {
@@ -4536,10 +4536,9 @@ h2.title-text {
 /* Applicant Details Page  */
 .form-group label {
   font-style: normal;
-  font-weight: bold;
+  font-weight: 400;
   font-size: 14px;
   line-height: 17px;
-  color: #595858;
 }
 
 .appl-detail-subsection {

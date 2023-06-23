@@ -97,6 +97,65 @@
             ("password" == $("#password").attr("type")) ? $("#password").attr("type", "text") : $(
                 "#password").attr("type", "password");
         })
+
+
+        $("#signin-form").submit(function (evt) {
+            evt.preventDefault();
+        }).validate({
+            rules: {
+                email: {
+                    required: true,
+                },
+                password: {
+                    required: true,
+                    minlength: 6,
+                },
+            },
+            messages: {
+                password: {
+                    required: "Please provide a password",
+                    minlength: "Your password must be at least 6 characters long",
+                },
+                email: "Please provide an email address",
+            },
+            submitHandler: function (form) {
+                $(".btn-loader").removeClass("d-none");
+                $(".submit-text").addClass("d-none");
+                $(".btn-login").attr("disabled", true);
+                const formData = $(form).serialize();
+                $.post("api.php", formData, function (res) {
+                    const Toast = Swal.mixin({
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                    })
+                    const response = res;
+                    if (response.status == "success") {
+                        Toast.fire({
+                            icon: 'success',
+                            animation: true,
+                            title: 'Signed in successfully'
+                        }).then(() => {
+                            location.reload();
+
+                        });
+                    } else {
+                        Swal.fire({
+                            text: response.message,
+                            title: "Error!",
+                            icon: "error",
+                            confirmButtonText: "OK",
+                            confirmButtonColor: "#c51c2f",
+                        });
+                        $(".btn-loader").addClass("d-none");
+                        $(".submit-text").removeClass("d-none");
+                        $(".btn-login").attr("disabled", false);
+                    }
+                });
+            },
+        });
     </script>
 </body>
 
