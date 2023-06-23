@@ -86,10 +86,18 @@
     </div>
 
     <script src="assets/js/jquery-3.5.1.min.js"></script>
-    <script src="assets/js/custom.js"></script>
     <script src="assets/js/jquery.validate.min.js"></script>
 
     <script src="assets/js/bootstrap-4.4.1.min.js"></script>
+    <script src="assets/js/custom.js"></script>
+
+    <script>
+        $(".view-pwd").click(function () {
+            $(this).toggleClass("ri-eye-line  ri-eye-off-line");
+            ("password" == $("#password").attr("type")) ? $("#password").attr("type", "text") : $(
+                "#password").attr("type", "password");
+        })
+    </script>
 </body>
 
 </html>

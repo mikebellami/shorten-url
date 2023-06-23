@@ -51,8 +51,20 @@
                         <input type="hidden" name="action" value="signin" />
 
                         <div class="form-group">
+                            <label class="form-label">First Name</label>
+                            <input type="text" id="fname" name="fname" placeholder="First Name"
+                                class="TextBox signin-input" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" id="lname" name="lname" placeholder="Last Name"
+                                class="TextBox signin-input" required>
+                        </div>
+
+                        <div class="form-group">
                             <label class="form-label">Email</label>
-                            <input type="text" id="email" name="email" placeholder="Email Address/Username"
+                            <input type="text" id="email" name="email" placeholder="Email Address"
                                 class="TextBox signin-input" required>
                         </div>
 
@@ -64,7 +76,7 @@
                         </div>
 
                         <button type="text" id="TextBox" name="TextBox" class="btn-login">
-                            <span class="submit-text ">signup</span>
+                            <span class="submit-text ">Register</span>
                             <span class="btn-loader d-none"></span>
                         </button>
                         <div class="exctr-forget">
@@ -90,6 +102,13 @@
     <script src="assets/js/jquery.validate.min.js"></script>
 
     <script src="assets/js/bootstrap-4.4.1.min.js"></script>
+    <script>
+        $(".view-pwd").click(function () {
+            $(this).toggleClass("ri-eye-line  ri-eye-off-line");
+            ("password" == $("#password").attr("type")) ? $("#password").attr("type", "text") : $(
+                "#password").attr("type", "password");
+        })
+    </script>
 </body>
 
 </html>
