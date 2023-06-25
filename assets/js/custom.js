@@ -14,7 +14,7 @@ function showToast(title, type, cb) {
 	Toast.fire({
 		icon: type,
 		title: title,
-    timerProgressBar: false,
+		timerProgressBar: false,
 		background: type == "success" ? "rgb(105 165 105)" : "rgb(195 51 65)",
 	}).then((result) => cb(result));
 }
@@ -57,6 +57,11 @@ function getCookie(name) {
 	return null;
 }
 
+// function to delete cookie
+const deleteCookie = (name) => {
+	document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+};
+
 // Function to store data in local storage
 const setToStorage = (key, value) => {
 	let storedValue = JSON.stringify(value);
@@ -67,6 +72,16 @@ const setToStorage = (key, value) => {
 const getFromStorage = (key) => {
 	let value = localStorage.getItem(key);
 	return value ? JSON.parse(value) : null;
+};
+
+// Function to show the preloader
+const showLoader = () => {
+	$(".preloader").show();
+};
+
+// Function to hide the preloader
+const hideLoader = () => {
+	$(".preloader").hide();
 };
 
 //* end helper functions
@@ -83,6 +98,18 @@ var api = {
 
 const makeApiCall = (ajaxOptions) => {
 	const { method, url, data, token, success, error } = ajaxOptions;
+
+	// Check system connectivity
+	if (!navigator.onLine) {
+		const errorResponse = {
+			response: {
+				status: "error",
+				data: { message: "No internet connection" },
+			},
+		};
+		error(errorResponse.response);
+		return;
+	}
 
 	// Wrap success callback to intercept responses
 	const successInterceptor = (res) => {
@@ -111,10 +138,10 @@ const makeApiCall = (ajaxOptions) => {
 
 		// Handle specific error codes
 		if (jqXHR.status === 401) {
-			// Handle expired token here (e.g., redirect to login page or refresh token)
-			console.log("Token expired. Redirecting to login page...");
-			// Redirect to login page
-			window.location.href = "/login";
+			showToast("expired or invalid token", "error", () => {
+				deleteCookie("shortlyToken");
+				location.href= "/shorten-url/login.html";
+			});
 		} else {
 			error(errorResponse.response);
 		}
@@ -196,18 +223,3 @@ const put = (url, data, token, success, error) => {
 };
 
 //* end ApI  helper function
-
-//? User auth
-const login = ({ email, password }, token) => {
-	return api.post("/user/login", { email, password }, token);
-};
-
-const register = ({ first_name, last_name, email, password }, token) => {
-	console.log(first_name, last_name, email, password);
-	// return api.post("/user/login", { email, password }, token);
-};
-
-const logout = ({ email, password }, token) => {
-	console.log(email, password);
-	// return api.post("/user/logout", { name, password }, token);
-};

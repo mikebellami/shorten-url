@@ -45,7 +45,7 @@
 				</div>
 				<div class="col-lg-6 col-md-12">
 					<div class="login-container">
-						<form id="signin-form">
+						<form id="signup-form">
 							<div class="signin-text__container mb-3">
 								<a class="navbar-brand align-self-start mb-5" href="index.php">
 									<svg
@@ -61,7 +61,7 @@
 									<!-- <img src="assets/images/logo.svg" alt="" class="exctr-logo"> -->
 								</a>
 								<p class="sigin-paragraph">
-									Welcome back, please enter you details
+									Hello 👋, please enter you details
 								</p>
 							</div>
 							<input type="hidden" name="action" value="signin" />
@@ -136,10 +136,11 @@
 		</div>
 
 		<script src="assets/js/jquery-3.5.1.min.js"></script>
-		<script src="assets/js/custom.js"></script>
 		<script src="assets/js/jquery.validate.min.js"></script>
-
 		<script src="assets/js/bootstrap-4.4.1.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+		<script src="assets/js/custom.js"></script>
+
 		<script>
 			$(".view-pwd").click(function () {
 				$(this).toggleClass("ri-eye-line  ri-eye-off-line");
@@ -148,7 +149,7 @@
 					: $("#password").attr("type", "password");
 			});
 
-			$("#signin-form")
+			$("#signup-form")
 				.submit(function (evt) {
 					evt.preventDefault();
 				})
@@ -162,6 +163,7 @@
 						},
 						email: {
 							required: true,
+							email: true
 						},
 						password: {
 							required: true,
@@ -175,7 +177,10 @@
 						},
 						fname: "Please provide First Name",
 						lname: "Please provide Last Name",
-						email: "Please provide an email address",
+						email: {
+							required: "Please provide an email address",
+							email: "Please provide a valid email address"
+						} 
 					},
 					submitHandler: function (form) {
 						$(".btn-loader").removeClass("d-none");
@@ -187,20 +192,12 @@
 							email: $("#email").val(),
 							password: $("#password").val(),
 						};
-            post(
+						post(
 							"/user/register",
 							formData,
 							null,
 							(res) => {
-								const { access_token, firstname, last_name, email } = res;
-
-								setCookie("shortlyToken", access_token, 1);
-								setToStorage("shortlyUser", {
-									firstname: firstname,
-									lastname: last_name,
-									email: email,
-								});
-								showToast("Successfully login", "success", () => {
+								showToast("Successfully Registered", "success", () => {
 									location.href = "login.html";
 								});
 							},

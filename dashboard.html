@@ -35,6 +35,10 @@
 	</head>
 
 	<body style="background-color: #f5f7fb">
+		<div class="preloader">
+			<div class="loader"></div>
+		</div>
+
 		<div class="wrapper">
 			<div class="px-5">
 				<div class="top-nav">
@@ -47,8 +51,16 @@
 						</svg>
 					</div>
 					<div class="top-nav-right">
-						<span class="hello-admin">Hello Administrator,</span>
-						<button type="button" class="pri-action-btn">Logout</button>
+						<div class="hello-admin">
+							Hello <span id="admin" class="text-capitalize"></span>
+						</div>
+						<button
+							type="button"
+							class="pri-action-btn"
+							onclick="deleteCookie('shortlyToken')"
+						>
+							Logout
+						</button>
 					</div>
 				</div>
 				<section class="section">
@@ -71,6 +83,7 @@
 									<table class="table shortly-table table-borderless">
 										<thead class="shortly-thead">
 											<tr class="shortly-thead-tr">
+												<th></th>
 												<th>S/N</th>
 												<th>Long url</th>
 												<th>Short url</th>
@@ -173,6 +186,29 @@
 
 		<script>
 			$(document).ready(function () {
+				//getuser data from local storage
+				var { email, firstname, lastname } = getFromStorage("shortlyUser");
+
+				//get token data from cookie
+				var token = getCookie("shortlyToken") 
+				token == null ? location.href = "/shorten-url/login.html" : null;
+
+				// add user information
+				$("#admin").html(firstname + " " + lastname);
+
+				// get all links
+				get(
+					"/link",
+					token,
+					(res) => {
+						console.log(res);
+						hideLoader();
+					},
+					(err) => {
+						console.log(err);
+					}
+				);
+
 				const tableBody = populate();
 				$("#shortly-table").html(tableBody);
 			});
@@ -182,23 +218,24 @@
 
 				const tableRows = data.map((_, index) => {
 					const row = `
-            <tr class="shortly-tbody-tr">
-              <td class="appl-pr-img">${index + 1}</td>
-              <td class="appl-pr-name full">Yakubu Ola Ogunfemi</td>
-              <td class="appl-pr-name full">Male</td>
-              <td class="appl-pr-name">kaskjaskjaskjasksaksakjsakjsak</td>
-              <td class="appl-pr-name">0</td>
-              <td class="appl-pr-action">
-                <div class="d-flex justify-content-center gap-10">
-                  <button class="sec-action-btn mr-3" onClick="generateQRCode(${index})">
-                    Details
-                  </button>
-                  <button class="pri-action-btn" onClick="visitPage()">Visit</button>
-                  <button class="pri-action-btn" onClick="visitPage()">Delete</button>
-                </div>
-              </td>
-            </tr>
-          `;
+						<tr class="shortly-tbody-tr">
+						<td class="appl-pr-img"></td>
+						<td class="appl-pr-img">${index + 1}</td>
+						<td class="appl-pr-name full">Yakubu Ola Ogunfemi</td>
+						<td class="appl-pr-name full">Male</td>
+						<td class="appl-pr-name">kaskjaskjaskjasksaksakjsakjsak</td>
+						<td class="appl-pr-name">0</td>
+						<td class="appl-pr-action">
+							<div class="d-flex justify-content-center gap-10">
+							<button class="sec-action-btn mr-3" onClick="generateQRCode(${index})">
+								Details
+							</button>
+							<button class="pri-action-btn" onClick="visitPage()">Visit</button>
+							<button class="del-action-btn" onClick="visitPage()">Delete</button>
+							</div>
+						</td>
+						</tr>
+					`;
 					return row;
 				});
 
@@ -207,22 +244,23 @@
 
 			const populateTable = (data) => {
 				return `
-          <tr class="shortly-tbody-tr">
-            <td class="appl-pr-img">1</td>
-            <td class="appl-pr-name full">Yakubu Ola Ogunfemi</td>
-            <td class="appl-pr-name full">Male</td>
-            <td class="appl-pr-name">kaskjaskjaskjasksaksakjsakjsak</td>
-            <td class="appl-pr-name">0</td>
-            <td class="appl-pr-action">
-              <div class="d-flex justify-content-center gap-10">
-                <button class="sec-action-btn mr-3" onClick="generateQRCode()">
-                  Details
-                </button>
-                <button class="pri-action-btn" onClick="visitPage()">Visit</button>
-              </div>
-            </td>
-          </tr>
-        `;
+					<tr class="shortly-tbody-tr">
+						<td class="appl-pr-img">1</td>
+						<td class="appl-pr-name full">Yakubu Ola Ogunfemi</td>
+						<td class="appl-pr-name full">Male</td>
+						<td class="appl-pr-name">kaskjaskjaskjasksaksakjsakjsak</td>
+						<td class="appl-pr-name">0</td>
+						<td class="appl-pr-action">
+						<div class="d-flex justify-content-center gap-10">
+							<button class="sec-action-btn mr-3" onClick="generateQRCode()">
+							Details
+							</button>
+							<button class="pri-action-btn" onClick="visitPage()">Visit</button>
+							<button class="del-action-btn" onClick="visitPage()">Delete</button>
+						</div>
+						</td>
+					</tr>
+					`;
 			};
 
 			const generateQRCode = (index) => {
