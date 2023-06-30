@@ -96,6 +96,27 @@ body {
   color: var(--primary-color);
 }
 
+.text-img-box {
+  width: 100%;
+  min-height: 200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.text-img-box .text {
+  width: 50%;
+  height: auto;
+  padding: 15px;
+ 
+}
+.text-img-box .text h3 {
+  font-size: 1.8rem;
+}
+
+.text-img-box .text p {
+  font-size: 1.6rem;
+}
 .signup-btn {
   background: var(--primary-color);
   padding: 11.5px 46px;

@@ -87,7 +87,7 @@
 												<th>S/N</th>
 												<th>Long url</th>
 												<th>Short url</th>
-												<th>Qr image</th>
+												<th class="d-none">Qr image</th>
 												<th>Clicks</th>
 												<th></th>
 											</tr>
@@ -126,11 +126,7 @@
 						</button>
 					</div>
 					<div class="modal-body rec-modal-body">
-						<form
-							id="filter-modal-form"
-							class="interview-modal-form"
-							method="POST"
-						>
+						<form id="modal-form" class="interview-modal-form" method="POST">
 							<div class="col-12 d-flex flex-wrap align-items-end p-0">
 								<div class="col-md-12 mb-3">
 									<div class="form-group">
@@ -139,6 +135,7 @@
 											<input
 												type="text"
 												name="long_url"
+												id="long_url"
 												placeholder="Enter url link "
 												class="form-control"
 											/>
@@ -153,6 +150,7 @@
 												type="text"
 												placeholder="Custom Backhalf"
 												name="custom_backhalf"
+												id="backhalf"
 												class="form-control"
 											/>
 										</div>
@@ -166,7 +164,9 @@
 											id="schd-btn"
 											class="btn float-right pri-action-btn"
 										>
-											Shorten URL
+										<span class="submit-text mr-3">Shorten URL</span>
+										<span class="btn-loader d-none"></span>
+											
 										</button>
 									</div>
 								</div>
@@ -190,8 +190,8 @@
 				var { email, firstname, lastname } = getFromStorage("shortlyUser");
 
 				//get token data from cookie
-				var token = getCookie("shortlyToken") 
-				token == null ? location.href = "/shorten-url/login.html" : null;
+				var token = getCookie("shortlyToken");
+				token == null ? (location.href = "/shorten-url/login.html") : null;
 
 				// add user information
 				$("#admin").html(firstname + " " + lastname);
@@ -201,16 +201,82 @@
 					"/link",
 					token,
 					(res) => {
-						console.log(res);
 						hideLoader();
+						console.log(res);
+						if (res.length > 0) {
+							
+							res.forEach((e, i) => {
+								
+								const tableBody = populateTable(e, i)
+								$("#shortly-table").html(tableBody);
+							});
+						}
 					},
 					(err) => {
 						console.log(err);
 					}
 				);
 
-				const tableBody = populate();
-				$("#shortly-table").html(tableBody);
+
+				//validate the form fields
+				$.validator.addMethod(
+					"urlWithoutProtocol",
+					function (value, element) {
+						if (this.optional(element)) {
+							return true;
+						}
+
+						// Regex pattern to validate URL without protocol prefix
+						var urlPattern = /^(www\.)?([a-zA-Z0-9-]+\.){1,}[a-zA-Z]{2,}$/;
+
+						return urlPattern.test(value);
+					},
+					"Please enter a valid URL"
+				);
+
+				$("#modal-form")
+					.submit(function (e) {
+						e.preventDefault();
+					})
+					.validate({
+						rules: {
+							long_url: {
+								required: true,
+								urlWithoutProtocol: true,
+							},
+						},
+						messages: {
+							long_url: {
+								required: "Please enter a URL",
+								urlWithoutProtocol: "Please enter a valid URL",
+							},
+						},
+						submitHandler: function (form) {
+							$(".btn-loader").removeClass("d-none");
+							$(".btn-login").attr("disabled", true);
+							var url = $("#long_url").val().toLowerCase();
+							var backhalf = $("#backhalf").val();
+							if (!url.includes("http://") && !url.includes("https://")) {
+								url = "http://" + url;
+							}
+							console.log({ long_url: url, custom_backhalf: backhalf });
+
+							post(
+								"/link/shorten",
+								{ long_url: url, custom_backhalf: backhalf },
+								token,
+								(res) => {
+									showToast("Successfully Registered", "success", () => {});
+								},
+								(err) => {
+									showToast("something when wrong ", "error", () => {
+										$(".btn-loader").addClass("d-none");
+										$(".btn-login").attr("disabled", false);
+									});
+								}
+							);
+						},
+					});
 			});
 
 			const populate = () => {
@@ -242,14 +308,14 @@
 				return tableRows.join("");
 			};
 
-			const populateTable = (data) => {
+			const populateTable = (data, index) => {
+				
 				return `
 					<tr class="shortly-tbody-tr">
-						<td class="appl-pr-img">1</td>
-						<td class="appl-pr-name full">Yakubu Ola Ogunfemi</td>
-						<td class="appl-pr-name full">Male</td>
-						<td class="appl-pr-name">kaskjaskjaskjasksaksakjsakjsak</td>
-						<td class="appl-pr-name">0</td>
+						<td class="appl-pr-img">${index + 1}</td>
+						<td class="appl-pr-name full">${data.long_url}</td>
+						<td class="appl-pr-name full">>${data.custom_backhalf}</td>
+						<td class="appl-pr-name">${data.clicks}</td>
 						<td class="appl-pr-action">
 						<div class="d-flex justify-content-center gap-10">
 							<button class="sec-action-btn mr-3" onClick="generateQRCode()">
