@@ -357,7 +357,8 @@
 				var dateTime = moment(data?.date_posted, "DD MMM YYYY HH:mm:ss Z");
 				var date = dateTime.format("ddd, MMM DD YYYY");
 				var time = dateTime.format("hh:mm A");
-				var qrUrl = "kilode.me/link/" + data?.short_url;
+				// var qrUrl = "https://kilode.me/link/" + data?.short_url;
+				var qrUrl = "https://kally-url-shortner.onrender.com//link/" + data?.short_url;
 				var qrDataUrl = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encodeURIComponent(data?.long_url)}`;
 
 				return `
@@ -371,7 +372,7 @@
 						<td class="appl-pr-name">${time}</td>
 						<td class="appl-pr-action">
 						<div class="d-flex justify-content-center gap-10">
-							<a href="http://${qrUrl}" target="_blank" class="pri-action-btn">Visit URL</a>
+							<a href="${qrUrl}" target="_blank" class="pri-action-btn">Visit URL</a>
 							
 							<button class="sec-action-btn mr-3 qr" data-img="${qrDataUrl}">QR Code</button>
 							

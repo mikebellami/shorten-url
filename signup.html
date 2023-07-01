@@ -190,7 +190,7 @@
 						const formData = {
 							first_name: $("#fname").val(),
 							last_name: $("#lname").val(),
-							email: $("#email").val(),
+							email: $("#email").val().toLowerCase(),
 							password: $("#password").val(),
 						};
 						post(

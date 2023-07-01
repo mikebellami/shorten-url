@@ -152,7 +152,7 @@
 					$(".submit-text").addClass("d-none");
 					$(".btn-login").attr("disabled", true);
 					const formData = {
-						email: $("#email").val(),
+						email: $("#email").val().toLowerCase(),
 						password: $("#password").val(),
 					};
 
