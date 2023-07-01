@@ -87,16 +87,18 @@
 												<th>S/N</th>
 												<th>Long url</th>
 												<th>Short url</th>
-												<th class="d-none">Qr image</th>
 												<th>Clicks</th>
+												<th>Date</th>
+												<th>Time</th>
 												<th></th>
 											</tr>
 										</thead>
 										<tbody class="shortly-tbody" id="shortly-table"></tbody>
 									</table>
-									<!-- <div class="d-flex align-items-center justify-content-center" id="spinner">
-                                    <span class="btn-loader-red">
-                                </div> -->
+									<div
+										class="d-flex align-items-center justify-content-center"
+										id="no-data"
+									></div>
 								</div>
 							</div>
 						</div>
@@ -105,6 +107,7 @@
 			</div>
 		</div>
 
+		<!-- create a shorten modal -->
 		<div
 			class="modal fade"
 			id="filter-modal"
@@ -164,14 +167,48 @@
 											id="schd-btn"
 											class="btn float-right pri-action-btn"
 										>
-										<span class="submit-text mr-3">Shorten URL</span>
-										<span class="btn-loader d-none"></span>
-											
+											<span class="submit-text mr-3">Shorten URL</span>
+											<span class="btn-loader d-none"></span>
 										</button>
 									</div>
 								</div>
 							</div>
 						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- qrcode modal -->
+		<div
+			class="modal fade"
+			id="filter-modal"
+			tabindex="-1"
+			role="dialog"
+			aria-hidden="true"
+		>
+			<div class="modal-dialog modal-sm" role="document">
+				<div class="modal-content app-modal-content">
+					<div class="modal-header">
+						<h4 class="modal-title">QR Code</h4>
+						<button
+							type="button"
+							class="close"
+							data-dismiss="modal"
+							aria-label="Close"
+						>
+							<span aria-hidden="true">&times;</span>
+						</button>
+					</div>
+					<div class="modal-body rec-modal-body">
+						<img id="qrcode-img" src="" alt="QR Code" />
+						<button
+							type="submit"
+							id="qr-btn"
+							class="btn float-right pri-action-btn"
+						>
+							<span class="submit-text mr-3"> Download QR Code</span>
+							<span class="btn-loader d-none"></span>
+						</button>
 					</div>
 				</div>
 			</div>
@@ -183,14 +220,16 @@
 		<script src="assets/js/bootstrap-4.4.1.min.js"></script>
 		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 		<script src="assets/js/custom.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
 
 		<script>
+			var token;
 			$(document).ready(function () {
 				//getuser data from local storage
 				var { email, firstname, lastname } = getFromStorage("shortlyUser");
 
 				//get token data from cookie
-				var token = getCookie("shortlyToken");
+				token = getCookie("shortlyToken");
 				token == null ? (location.href = "/shorten-url/login.html") : null;
 
 				// add user information
@@ -202,21 +241,19 @@
 					token,
 					(res) => {
 						hideLoader();
-						console.log(res);
 						if (res.length > 0) {
-							
 							res.forEach((e, i) => {
-								
-								const tableBody = populateTable(e, i)
-								$("#shortly-table").html(tableBody);
+								const tableBody = populateTable(e, i);
+								$("#shortly-table").append(tableBody);
 							});
+						} else {
+							$("#no-data").html(`<h3 class="text-muted">No record found</h3>`);
 						}
 					},
 					(err) => {
 						console.log(err);
 					}
 				);
-
 
 				//validate the form fields
 				$.validator.addMethod(
@@ -259,17 +296,18 @@
 							if (!url.includes("http://") && !url.includes("https://")) {
 								url = "http://" + url;
 							}
-							console.log({ long_url: url, custom_backhalf: backhalf });
 
 							post(
 								"/link/shorten",
 								{ long_url: url, custom_backhalf: backhalf },
 								token,
 								(res) => {
-									showToast("Successfully Registered", "success", () => {});
+									showToast("Successfully Registered", "success", () => {
+										location.reload();
+									});
 								},
 								(err) => {
-									showToast("something when wrong ", "error", () => {
+									showToast(err.data.message, "error", () => {
 										$(".btn-loader").addClass("d-none");
 										$(".btn-login").attr("disabled", false);
 									});
@@ -279,61 +317,77 @@
 					});
 			});
 
-			const populate = () => {
-				const data = Array(4).fill();
-
-				const tableRows = data.map((_, index) => {
-					const row = `
-						<tr class="shortly-tbody-tr">
-						<td class="appl-pr-img"></td>
-						<td class="appl-pr-img">${index + 1}</td>
-						<td class="appl-pr-name full">Yakubu Ola Ogunfemi</td>
-						<td class="appl-pr-name full">Male</td>
-						<td class="appl-pr-name">kaskjaskjaskjasksaksakjsakjsak</td>
-						<td class="appl-pr-name">0</td>
-						<td class="appl-pr-action">
-							<div class="d-flex justify-content-center gap-10">
-							<button class="sec-action-btn mr-3" onClick="generateQRCode(${index})">
-								Details
-							</button>
-							<button class="pri-action-btn" onClick="visitPage()">Visit</button>
-							<button class="del-action-btn" onClick="visitPage()">Delete</button>
-							</div>
-						</td>
-						</tr>
-					`;
-					return row;
-				});
-
-				return tableRows.join("");
-			};
-
 			const populateTable = (data, index) => {
-				
+				var dateTime = moment(data?.date_posted, "ddd, DD MMM YYYY HH:mm:ss Z");
+				var date = dateTime.format("ddd, MMM DD YYYY");
+				var time = dateTime.format("hh:mm A");
+
 				return `
 					<tr class="shortly-tbody-tr">
+						<td class="appl-pr-img"></td>
 						<td class="appl-pr-img">${index + 1}</td>
-						<td class="appl-pr-name full">${data.long_url}</td>
-						<td class="appl-pr-name full">>${data.custom_backhalf}</td>
-						<td class="appl-pr-name">${data.clicks}</td>
+						<td class="appl-pr-name full">${data?.long_url}</td>
+						<td class="appl-pr-name full">${data?.short_url}</td>
+						<td class="appl-pr-name">${data?.click}</td>
+						<td class="appl-pr-name">${date}</td>
+						<td class="appl-pr-name">${time}</td>
 						<td class="appl-pr-action">
 						<div class="d-flex justify-content-center gap-10">
-							<button class="sec-action-btn mr-3" onClick="generateQRCode()">
-							Details
-							</button>
-							<button class="pri-action-btn" onClick="visitPage()">Visit</button>
-							<button class="del-action-btn" onClick="visitPage()">Delete</button>
+							<button class="sec-action-btn mr-3" onClick="generateQRCode()">QR Code</button>
+							<button class="pri-action-btn" onClick="visitPage('${
+								data?.short_url
+							}')">Visit</button>
+							<button class="del-action-btn" onClick="deleteShortly(${
+								data?.id
+							})">Delete</button>
 						</div>
 						</td>
 					</tr>
 					`;
 			};
 
-			const generateQRCode = (index) => {
-				console.log(index);
+			const deleteShortly = (id) => {
+				del(
+					`/link/remove/${id}`,
+					token,
+					(res) => {
+						console.log(res);
+						showToast(res.message, "success", () => {
+							location.reload();
+						});
+					},
+					(err) => {
+						console.log(err);
+						showToast(err.data.message, "error", () => {
+							$(".btn-loader").addClass("d-none");
+							$(".btn-login").attr("disabled", false);
+						});
+					}
+				);
 			};
-			const visitPage = () => {
-				console.log("visit");
+			const generateQRCode = (qrText) => {
+				console.log(qrText);
+				const qrDataUrl = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(
+					qrText
+				)}`;
+
+				// Set the generated QR code as the source of an image element
+				// $("#qrcode-img").attr("src", qrDataUrl);
+
+				// Show the download button
+				// $("#download-btn").show();
+			};
+			const visitPage = (url) => {
+				get(
+					`/link/${url}`,
+					token,
+					(res) => {
+						console.log("visit", res);
+					},
+					(err) => {
+						console.log("visitErr", err);
+					}
+				);
 			};
 		</script>
 	</body>

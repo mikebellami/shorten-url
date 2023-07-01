@@ -60,6 +60,7 @@ function getCookie(name) {
 // function to delete cookie
 const deleteCookie = (name) => {
 	document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+	location.href = "login.html";
 };
 
 // Function to store data in local storage
@@ -140,7 +141,7 @@ const makeApiCall = (ajaxOptions) => {
 		if (jqXHR.status === 401) {
 			showToast("expired or invalid token", "error", () => {
 				deleteCookie("shortlyToken");
-				location.href= "/shorten-url/login.html";
+				location.href= "login.html";
 			});
 		} else {
 			error(errorResponse.response);
