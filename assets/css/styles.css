@@ -81,7 +81,10 @@ body {
 }
 
 .user-container {
-  margin: 45px;
+  margin: 50px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .user-link {
   border-radius: 5px;
@@ -100,6 +103,8 @@ body {
 }
 
 .text-img-box {
+  margin-top: 70px;
+  margin-bottom: 70px;
   width: 100%;
   min-height: 200px;
   display: flex;
@@ -108,17 +113,22 @@ body {
 }
 
 .text-img-box .text {
-  width: 50%;
+
   height: auto;
   padding: 15px;
  
 }
 .text-img-box .text h3 {
-  font-size: 1.8rem;
+  font-size: 2.2rem;
+  color: var(--primary-color);
+  font-weight: 700;
+  line-height: 40px;
 }
-
 .text-img-box .text p {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
+  line-height: 30px;
+  font-weight: 500;
+  color: #484848;
 }
 .signup-btn {
   background: var(--primary-color);
@@ -135,7 +145,6 @@ body {
 .paragraph-container {
   text-align: center;
   padding: 30px 20px 10px 20px;
-  width: 90%;
   margin: auto;
 }
 .shortly-pry {
