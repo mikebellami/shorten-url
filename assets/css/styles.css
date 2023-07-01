@@ -182,7 +182,7 @@ body {
   background-image: url(../images/bg1.jpeg);
   background-repeat: no-repeat;
   background-size: contain;
-  background-position: bottom;
+  background-position: center center;
   background-color: #6aa4f6;
 }
 
