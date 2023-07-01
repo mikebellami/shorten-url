@@ -357,10 +357,8 @@
 				var dateTime = moment(data?.date_posted, "DD MMM YYYY HH:mm:ss Z");
 				var date = dateTime.format("ddd, MMM DD YYYY");
 				var time = dateTime.format("hh:mm A");
-				var qrUrl = "kilode.me/" + data?.short_url;
-				var qrDataUrl = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encodeURIComponent(
-					qrUrl
-				)}`;
+				var qrUrl = "kilode.me/link/" + data?.short_url;
+				var qrDataUrl = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encodeURIComponent(data?.long_url)}`;
 
 				return `
 					<tr class="shortly-tbody-tr">
@@ -373,7 +371,7 @@
 						<td class="appl-pr-name">${time}</td>
 						<td class="appl-pr-action">
 						<div class="d-flex justify-content-center gap-10">
-							<a href="http://${qrUrl}" target="_blank" class="pri-action-btn" onClick="updateClick('${data?.short_url}')">Visit URL</a>
+							<a href="http://${qrUrl}" target="_blank" class="pri-action-btn">Visit URL</a>
 							
 							<button class="sec-action-btn mr-3 qr" data-img="${qrDataUrl}">QR Code</button>
 							
@@ -414,19 +412,6 @@
 				});
 			};
 
-			// update clicks
-			const updateClick = (url) => {
-				get(
-					`/link/${url}`,
-					token,
-					(res) => {
-						location.reload();
-					},
-					(err) => {
-						showToast("Ouch.. something went wrong", "error", () => {});
-					}
-				);
-			};
 		</script>
 	</body>
 </html>
