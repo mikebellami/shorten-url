@@ -84,6 +84,24 @@ const showLoader = () => {
 const hideLoader = () => {
 	$(".preloader").hide();
 };
+function loader() {
+    $(".button").attr("disabled", true)
+    Swal.fire({
+        padding: '1em',
+        html: '<span class="btn-loader-red" ></span>',
+        allowOutsideClick: false,
+        showCancelButton: false,
+        showConfirmButton: false,
+        customClass: {
+            popup: 'rm-swal-modal',
+        }
+    })
+}
+
+function stopLoader() {
+    $(".button").attr("disabled", false); // Enable the button
+    Swal.close(); // Close the loader
+}
 
 //* end helper functions
 

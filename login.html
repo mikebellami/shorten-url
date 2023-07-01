@@ -172,11 +172,10 @@
 							});
 						},
 						(err) => {
-							showToast(err?.data?.message, "error", () => {
-								$(".btn-loader").addClass("d-none");
-								$(".submit-text").removeClass("d-none");
-								$(".btn-login").attr("disabled", false);
-							});
+							$(".btn-loader").addClass("d-none");
+							$(".submit-text").removeClass("d-none");
+							$(".btn-login").attr("disabled", false);
+							showToast(err?.data?.message, "error", () => {});
 						}
 					);
 				},

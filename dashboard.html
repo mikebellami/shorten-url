@@ -181,7 +181,7 @@
 		<!-- qrcode modal -->
 		<div
 			class="modal fade"
-			id="filter-modal"
+			id="qr-modal"
 			tabindex="-1"
 			role="dialog"
 			aria-hidden="true"
@@ -200,11 +200,13 @@
 						</button>
 					</div>
 					<div class="modal-body rec-modal-body">
-						<img id="qrcode-img" src="" alt="QR Code" />
+						<div class="d-flex justify-content-center align-items-center mb-5">
+							<img id="qrcode-img" src="" alt="QR Code" />
+						</div>
 						<button
 							type="submit"
 							id="qr-btn"
-							class="btn float-right pri-action-btn"
+							class="btn mx-auto pri-action-btn download-qr"
 						>
 							<span class="submit-text mr-3"> Download QR Code</span>
 							<span class="btn-loader d-none"></span>
@@ -221,6 +223,7 @@
 		<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 		<script src="assets/js/custom.js"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+		<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
 
 		<script>
 			var token;
@@ -240,7 +243,6 @@
 					"/link",
 					token,
 					(res) => {
-						hideLoader();
 						if (res.length > 0) {
 							res.forEach((e, i) => {
 								const tableBody = populateTable(e, i);
@@ -249,11 +251,37 @@
 						} else {
 							$("#no-data").html(`<h3 class="text-muted">No record found</h3>`);
 						}
+						hideLoader();
 					},
 					(err) => {
 						console.log(err);
 					}
 				);
+
+				//view qr code
+				$(document).on("click", ".qr", function () {
+					var img = $(this).attr("data-img");
+					$("#qrcode-img").attr("src", img);
+					$("#qr-modal").modal("show");
+				});
+
+				//download qrcode to png
+				$(document).on("click", ".download-qr", function () {
+					html2canvas($("#qrcode-img")[0], {
+						useCORS: true,
+					}).then(function (canvas) {
+						const image = canvas.toDataURL("image/png");
+
+						const link = document.createElement("a");
+						link.href = image;
+						link.download = "qrcode.png";
+
+						// Trigger the download
+						document.body.appendChild(link);
+						link.click();
+						document.body.removeChild(link);
+					});
+				});
 
 				//validate the form fields
 				$.validator.addMethod(
@@ -264,7 +292,8 @@
 						}
 
 						// Regex pattern to validate URL without protocol prefix
-						var urlPattern = /^(www\.)?([a-zA-Z0-9-]+\.){1,}[a-zA-Z]{2,}$/;
+						var urlPattern =
+							/^(https?:\/\/)?(www\.)?([a-zA-Z0-9-]+\.){1,}[a-zA-Z]{2,}(\/.*)?$/;
 
 						return urlPattern.test(value);
 					},
@@ -297,30 +326,41 @@
 								url = "http://" + url;
 							}
 
+							var fd = {
+								long_url: url,
+							};
+							if (backhalf != "") {
+								fd["custom_backhalf"] = backhalf;
+							}
+
 							post(
 								"/link/shorten",
-								{ long_url: url, custom_backhalf: backhalf },
+								fd,
 								token,
 								(res) => {
-									showToast("Successfully Registered", "success", () => {
+									showToast("URL created successfully", "success", () => {
 										location.reload();
 									});
 								},
 								(err) => {
-									showToast(err.data.message, "error", () => {
-										$(".btn-loader").addClass("d-none");
-										$(".btn-login").attr("disabled", false);
-									});
+									$(".btn-loader").addClass("d-none");
+									$("#schd-btn").attr("disabled", false);
+									showToast(err.data.message, "error", () => {});
 								}
 							);
 						},
 					});
 			});
 
+			//populate the table
 			const populateTable = (data, index) => {
-				var dateTime = moment(data?.date_posted, "ddd, DD MMM YYYY HH:mm:ss Z");
+				var dateTime = moment(data?.date_posted, "DD MMM YYYY HH:mm:ss Z");
 				var date = dateTime.format("ddd, MMM DD YYYY");
 				var time = dateTime.format("hh:mm A");
+				var qrUrl = "kilode.me/" + data?.short_url;
+				var qrDataUrl = `https://chart.googleapis.com/chart?chs=250x250&cht=qr&chl=${encodeURIComponent(
+					qrUrl
+				)}`;
 
 				return `
 					<tr class="shortly-tbody-tr">
@@ -333,59 +373,57 @@
 						<td class="appl-pr-name">${time}</td>
 						<td class="appl-pr-action">
 						<div class="d-flex justify-content-center gap-10">
-							<button class="sec-action-btn mr-3" onClick="generateQRCode()">QR Code</button>
-							<button class="pri-action-btn" onClick="visitPage('${
-								data?.short_url
-							}')">Visit</button>
-							<button class="del-action-btn" onClick="deleteShortly(${
-								data?.id
-							})">Delete</button>
+							<a href="http://${qrUrl}" target="_blank" class="pri-action-btn" onClick="updateClick('${data?.short_url}')">Visit URL</a>
+							
+							<button class="sec-action-btn mr-3 qr" data-img="${qrDataUrl}">QR Code</button>
+							
+							<button class="del-action-btn" onClick="deleteShortly(${data?.id})">Delete</button>
 						</div>
 						</td>
 					</tr>
 					`;
 			};
 
+			// delete shortern url
 			const deleteShortly = (id) => {
-				del(
-					`/link/remove/${id}`,
-					token,
-					(res) => {
-						console.log(res);
-						showToast(res.message, "success", () => {
-							location.reload();
-						});
-					},
-					(err) => {
-						console.log(err);
-						showToast(err.data.message, "error", () => {
-							$(".btn-loader").addClass("d-none");
-							$(".btn-login").attr("disabled", false);
-						});
+				Swal.fire({
+					title: "Are you sure?",
+					text: "You won't be able to revert this!",
+					icon: "warning",
+					showCancelButton: true,
+					confirmButtonColor: "var(--primary-color)",
+					cancelButtonColor: "#c82333",
+					confirmButtonText: "Yes, delete it!",
+				}).then((result) => {
+					if (result.isConfirmed) {
+						loader();
+						del(
+							`/link/remove/${id}`,
+							token,
+							(res) => {
+								showToast(res.message, "success", () => {
+									location.reload();
+								});
+							},
+							(err) => {
+								stopLoader();
+								showToast(err.data.message, "error", () => {});
+							}
+						);
 					}
-				);
+				});
 			};
-			const generateQRCode = (qrText) => {
-				console.log(qrText);
-				const qrDataUrl = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=${encodeURIComponent(
-					qrText
-				)}`;
 
-				// Set the generated QR code as the source of an image element
-				// $("#qrcode-img").attr("src", qrDataUrl);
-
-				// Show the download button
-				// $("#download-btn").show();
-			};
-			const visitPage = (url) => {
+			// update clicks
+			const updateClick = (url) => {
 				get(
 					`/link/${url}`,
 					token,
 					(res) => {
-						console.log("visit", res);
+						location.reload();
 					},
 					(err) => {
-						console.log("visitErr", err);
+						showToast("Ouch.. something went wrong", "error", () => {});
 					}
 				);
 			};
